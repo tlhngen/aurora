@@ -229,7 +229,7 @@
     const auroraPoint = []
     const segmentColor = []
     let duration = 0.0
-    const testAurora = []
+    const layerPoints = []
 
     //setupTraits
     let colorTraits
@@ -314,7 +314,19 @@
       });
 
       // console.log(rgbColor)
-      return rgbColor
+      return color(rgbColor)
+    }
+    //layer
+    function drawLayer(amp, zoom, space, layerCount) {
+      beginShape()
+      for (let x = 0; x < windowWidth; x += space) {
+        let noiseValue = noise(x * zoom)
+        vertex(x, windowHeight - (windowHeight / 6) - noiseValue * amp)
+
+      }
+      vertex(windowWidth, windowHeight)
+      vertex(0, windowHeight)
+      endShape()
     }
 
     function draw() {
@@ -325,6 +337,9 @@
       // gradientShape(windowWidth, 0, windowWidth, windowHeight, 0, windowHeight, 0, 0, colorTraits[2], 100)
       noiseDetail(2, 1)
       getRGB(colorTraits[2])
+
+      drawLayer(120, .002, 30, 1)
+
 
       //declare
       // const aurora1Start = []
@@ -348,7 +363,6 @@
         aurora1End.push(createVector(auroraPoint[i].x + 70, mappedY))
         fill(255)
         ellipse(auroraPoint[i].x, aurora1End[i].y, 3)
-        ellipse(auroraPoint[i].x, aurora1End[i].y, 3)
         // gradientLine(auroraPoint[i].x, auroraPoint[i].y, aurora1End[i].x, aurora1End[i].y, colors, opacity);
 
         //aurora layer
@@ -360,6 +374,7 @@
       }
       duration += .004
       // noLoop()
+
     }
 
   </script>
