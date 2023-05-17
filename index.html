@@ -52,17 +52,6 @@
   <!-- regljs@2.1.0
   <script sandbox="allow-scripts" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/regl/2.1.0/regl.min.js"></script>
   -->
-  <script sandbox="allow-scripts" type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js"></script>
-  <script type="text/javascript">
-
-    // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ Add your script here ↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-    //
-    //
-    //
-    // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ Add your script here ↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-
-  </script>
 
   <script id="snippet-random-code" type="text/javascript">
 
@@ -226,10 +215,7 @@
     }
     //end core functions
 
-    const auroraPoint = []
-    const segmentColor = []
     let duration = 0.0
-    const layerPoints = []
 
     //setupTraits
     let colorTraits
@@ -239,14 +225,84 @@
 
       colorTraits = traits(colorPallete, random())
       console.log('colorTraits', colorTraits)
-
-      let yDefault = 0
-
-      for (x = 0; x < width + width * .3; x += 7) {
-        auroraPoint.push(createVector(x - 170, yDefault))
-      }
     }
 
+    function draw() {
+      //setup
+      background(colorTraits[2][0])
+      // let bgColor = color(colorTraits[2][0], 'pink', 'red')
+      // gradientShape(windowWidth, 0, windowWidth, windowHeight, 0, windowHeight, 0, 0, colorTraits[2], 100)
+      noiseDetail(2, 1)
+      getRGB(colorTraits[2])
+      //traits variable
+      let colors = colorTraits[2];
+      let opacity = 10;
+      // noiseSeed(10)
+      //declare layer variable
+      let LAYER_AMP = 120
+      let NOISE_ZOOM = .002
+      let LAYER_SPACE_POINTS = 30
+      let LAYERCOUNT = 2
+
+      //draw
+      drawLayer(120, .002, 30, 1)
+
+
+      stroke(255)
+      let lineX = { x: 300, y: 400 }
+      let lineY = { x: 750, y: 500 }
+
+      drawParticles(lineX, lineY, colors, opacity)
+    }
+    //draw Particles Function
+    function drawParticles(lineStart, lineEnd, colors, opacity) {
+      //declare
+      let lineCoordinates = []
+      let lineEndCoordinates = []
+      let particles = []
+      let MOTION_AMP = 0.02
+      let MOTION_ZOOM = 150
+      let distancePoint = 400
+
+      let distance = dist(lineStart.x, lineStart.y, lineEnd.x, lineEnd.y)
+      let points = floor(distance) / 10
+
+      for (let i = 0; i <= points; i += 1) {
+        let t = i / points
+        let x = lerp(lineStart.x, lineEnd.x, t)
+        let y = lerp(lineStart.y, lineEnd.y, t)
+
+        //motion
+        let noiseVal = noise(Math.sin(duration * MOTION_AMP + i) * MOTION_ZOOM, Math.cos(duration * MOTION_AMP + i) * MOTION_ZOOM)
+        let mappedX = map(noiseVal, 0, 1, x, x + 5)
+        let mappedY = map(noiseVal, -1, 1, y - 10, y + 300)
+
+        //startPoint
+        lineCoordinates.push(new Particle(mappedX, mappedY))
+        // ellipse(lineCoordinates[i].x, lineCoordinates[i].y, 2)
+        //endPoint
+
+        lineEndCoordinates.push(new Particle(mappedX, mappedY - distancePoint))
+        // ellipse(lineEndCoordinates[i].x, lineEndCoordinates[i].y, 2)
+
+        gradientLine(lineEndCoordinates[i].x, lineEndCoordinates[i].y, lineCoordinates[i].x, lineCoordinates[i].y, colors, opacity)
+        // particles.push(new Particles(mappedLineX, mappedLineY))
+        // ellipse(particles[i].x, particles[i].y, 2)
+      }
+      duration += .005
+
+    }
+    //particle style
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y
+      }
+
+      create() {
+        createVector(x, y)
+      }
+    }
     //gradientLine Func
     function gradientLine(x1, y1, x2, y2, colorStops, opacity) {
       // linear gradient from start to end of line
@@ -317,64 +373,16 @@
       return color(rgbColor)
     }
     //layer
-    function drawLayer(amp, zoom, space, layerCount) {
+    function drawLayer(LAYER_AMP, NOISE_ZOOM, LAYER_SPACE_POINTS, LAYERCOUNT) {
       beginShape()
-      for (let x = 0; x < windowWidth; x += space) {
-        let noiseValue = noise(x * zoom)
-        vertex(x, windowHeight - (windowHeight / 6) - noiseValue * amp)
+      for (let x = 0; x < windowWidth + 100; x += LAYER_SPACE_POINTS) {
+        let noiseValue = noise(x * NOISE_ZOOM)
+        vertex(x, windowHeight - (windowHeight / 6) - noiseValue * LAYER_AMP)
 
       }
       vertex(windowWidth, windowHeight)
       vertex(0, windowHeight)
-      endShape()
-    }
-
-    function draw() {
-      // console.log('hexToRgb(colorTraits[2][0])', hexToRgb(colorTraits[2][0]))
-      //setup
-      background(colorTraits[2][0])
-      // let bgColor = color(colorTraits[2][0], 'pink', 'red')
-      // gradientShape(windowWidth, 0, windowWidth, windowHeight, 0, windowHeight, 0, 0, colorTraits[2], 100)
-      noiseDetail(2, 1)
-      getRGB(colorTraits[2])
-
-      drawLayer(120, .002, 30, 1)
-
-
-      //declare
-      // const aurora1Start = []
-      const aurora1End = []
-      const aurora2Start = []
-      const aurora2End = []
-
-      // let noiseStart = windowHeight / 10
-      let start = windowHeight / 3
-      let layerStart = windowHeight / 3
-      let colors = colorTraits[2];
-      let opacity = 10;
-
-      //draw
-      for (let i = 0; i < auroraPoint.length; i++) {
-        //aurora main
-        let noiseValue = noise(Math.cos(duration * 0.05 + i) * 50)
-        // let mappedYStart = map(noiseValue, 0, 1, noiseStart - 110, noiseStart + 170)
-        let mappedY = map(noiseValue, 0, 1, start + 10, start + 50)
-        // aurora1Start.push(createVector(auroraPoint[i].x + 70, mappedY))
-        aurora1End.push(createVector(auroraPoint[i].x + 70, mappedY))
-        fill(255)
-        ellipse(auroraPoint[i].x, aurora1End[i].y, 3)
-        // gradientLine(auroraPoint[i].x, auroraPoint[i].y, aurora1End[i].x, aurora1End[i].y, colors, opacity);
-
-        //aurora layer
-        aurora2Start.push(createVector(auroraPoint[i].x + 80, mappedY))
-        let layerNoise = noise(i / 30, Math.cos(duration))
-        let layerMappedY = map(layerNoise, 0, 1, layerStart + 200, layerStart + 400)
-        aurora2End.push(createVector(aurora2Start[i].x + 80, layerMappedY))
-        // gradientLine(aurora2Start[i].x, aurora2Start[i].y, aurora2End[i].x, aurora2End[i].y, colors, opacity);
-      }
-      duration += .004
-      // noLoop()
-
+      endShape(CLOSE)
     }
 
   </script>
