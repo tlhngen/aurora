@@ -249,9 +249,9 @@
 
 
       stroke(255)
-      let lineX = { x: 300, y: 400 }
-      let lineY = { x: 750, y: 500 }
-
+      let lineX = { x: 100, y: 100 }
+      let lineY = { x: 350, y: 250 }
+      translate(windowWidth / 2, windowHeight / 2)
       drawParticles(lineX, lineY, colors, opacity)
     }
     //draw Particles Function
@@ -260,12 +260,12 @@
       let lineCoordinates = []
       let lineEndCoordinates = []
       let particles = []
+      let distancePoint = windowHeight / 10
       let MOTION_AMP = 0.02
       let MOTION_ZOOM = 150
-      let distancePoint = 400
 
       let distance = dist(lineStart.x, lineStart.y, lineEnd.x, lineEnd.y)
-      let points = floor(distance) / 10
+      let points = floor(distance)
 
       for (let i = 0; i <= points; i += 1) {
         let t = i / points
@@ -274,21 +274,27 @@
 
         //motion
         let noiseVal = noise(Math.sin(duration * MOTION_AMP + i) * MOTION_ZOOM, Math.cos(duration * MOTION_AMP + i) * MOTION_ZOOM)
-        let mappedX = map(noiseVal, 0, 1, x, x + 5)
-        let mappedY = map(noiseVal, -1, 1, y - 10, y + 300)
+        // const oH = (sin(i * .015 + frameCount * .01)) * 50 + height / 2;
+        const oH = (sin(i * .015 + frameCount * .01)) * 50;
+        const oX = (sin(i * .015 + frameCount * .01)) * 50;
+
+        // let mappedX = map(noiseVal, 0, 1, x, x + 1)
+        // let mappedY = map(noiseVal, -1, 1, y - 10, y + 300)
 
         //startPoint
-        lineCoordinates.push(new Particle(mappedX, mappedY))
+        lineCoordinates.push(new Particle(i + oX, oH))
         // ellipse(lineCoordinates[i].x, lineCoordinates[i].y, 2)
         //endPoint
 
-        lineEndCoordinates.push(new Particle(mappedX, mappedY - distancePoint))
+        lineEndCoordinates.push(new Particle(i + oX, oH - distancePoint))
         // ellipse(lineEndCoordinates[i].x, lineEndCoordinates[i].y, 2)
 
         gradientLine(lineEndCoordinates[i].x, lineEndCoordinates[i].y, lineCoordinates[i].x, lineCoordinates[i].y, colors, opacity)
         // particles.push(new Particles(mappedLineX, mappedLineY))
         // ellipse(particles[i].x, particles[i].y, 2)
       }
+
+
       duration += .005
 
     }
