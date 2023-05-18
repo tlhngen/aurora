@@ -216,6 +216,32 @@
     //end core functions
 
     let duration = 0.0
+    const auroraLines = [
+      [
+        { x: 1920 / 2, y: 100 },
+        { x: 850, y: 750 }
+      ],
+      [
+        { x: 1000, y: 50 },
+        { x: 250, y: 200 }
+      ],
+      [
+        { x: 650, y: 150 },
+        { x: 750, y: 300 }
+      ],
+      [
+        { x: 10, y: 10 },
+        { x: 550, y: 400 }
+      ],
+      [
+        { x: 150, y: 150 },
+        { x: 550, y: 400 }
+      ],
+      [
+        { x: 300, y: 450 },
+        { x: 600, y: 800 }
+      ],
+    ]
 
     //setupTraits
     let colorTraits
@@ -231,71 +257,70 @@
       //setup
       background(colorTraits[2][0])
       // let bgColor = color(colorTraits[2][0], 'pink', 'red')
-      // gradientShape(windowWidth, 0, windowWidth, windowHeight, 0, windowHeight, 0, 0, colorTraits[2], 100)
+      gradientShape(windowWidth, 0, windowWidth, windowHeight, 0, windowHeight, 0, 0, colorTraits[2], 100)
       noiseDetail(2, 1)
-      getRGB(colorTraits[2])
+
+      let colorRGB = getRGB(colorTraits[2])
+      // console.log(colorRGB)
       //traits variable
       let colors = colorTraits[2];
       let opacity = 10;
-      // noiseSeed(10)
+
       //declare layer variable
-      let LAYER_AMP = 120
-      let NOISE_ZOOM = .002
-      let LAYER_SPACE_POINTS = 30
+      let LAYER_AMP = 50
+      let NOISE_ZOOM = 0.003
+      let LAYER_SPACE_POINTS = 50
       let LAYERCOUNT = 2
 
       //draw
-      drawLayer(120, .002, 30, 1)
-
-
+      drawLayer(LAYER_AMP, NOISE_ZOOM, LAYER_SPACE_POINTS, LAYERCOUNT)
       stroke(255)
-      let lineX = { x: 100, y: 100 }
-      let lineY = { x: 350, y: 250 }
-      translate(windowWidth / 2, windowHeight / 2)
-      drawParticles(lineX, lineY, colors, opacity)
+
+      for (let i = 0; i < auroraLines.length; i += 1) {
+        const lineStart = auroraLines[i][0]
+        const lineEnd = auroraLines[i][1]
+
+        drawParticles(lineStart.x, lineStart.y, lineEnd.x, lineEnd.y, colors, opacity)
+      }
     }
+    let dur
+
     //draw Particles Function
-    function drawParticles(lineStart, lineEnd, colors, opacity) {
+    function drawParticles(startX, startY, endX, endY, colors, opacity) {
       //declare
       let lineCoordinates = []
       let lineEndCoordinates = []
-      let particles = []
-      let distancePoint = windowHeight / 10
-      let MOTION_AMP = 0.02
+      let auroraHeight = windowHeight / 5
+      let MOTION_AMP = 0.01
       let MOTION_ZOOM = 150
 
-      let distance = dist(lineStart.x, lineStart.y, lineEnd.x, lineEnd.y)
-      let points = floor(distance)
+      let distance = dist(startX, startY, endX, endY)
+      let points = ceil(distance)
+      let duration = frameCount * .01
 
       for (let i = 0; i <= points; i += 1) {
         let t = i / points
-        let x = lerp(lineStart.x, lineEnd.x, t)
-        let y = lerp(lineStart.y, lineEnd.y, t)
+        let x = lerp(startX, endX, t)
+        let y = lerp(startY, endY, t)
 
-        //motion
         let noiseVal = noise(Math.sin(duration * MOTION_AMP + i) * MOTION_ZOOM, Math.cos(duration * MOTION_AMP + i) * MOTION_ZOOM)
-        // const oH = (sin(i * .015 + frameCount * .01)) * 50 + height / 2;
-        const oH = (sin(i * .015 + frameCount * .01)) * 50;
-        const oX = (sin(i * .015 + frameCount * .01)) * 50;
+        let mappedY = map(noiseVal, -1, 1, y - 20, y + 100)
+        //motion
+        // const oH = (sin(i * .015 + duration)) * 50 + height / 2;
+        const oH = (sin(i * .015 + duration)) * 10 + height / 2
+        const oX = (sin(i * .015 + duration)) * 150 + startX
 
-        // let mappedX = map(noiseVal, 0, 1, x, x + 1)
-        // let mappedY = map(noiseVal, -1, 1, y - 10, y + 300)
-
-        //startPoint
-        lineCoordinates.push(new Particle(i + oX, oH))
+        lineCoordinates.push(new Particle(i + oX, mappedY))
+        lineEndCoordinates.push(new Particle(i + oX, mappedY - auroraHeight))
         // ellipse(lineCoordinates[i].x, lineCoordinates[i].y, 2)
-        //endPoint
-
-        lineEndCoordinates.push(new Particle(i + oX, oH - distancePoint))
         // ellipse(lineEndCoordinates[i].x, lineEndCoordinates[i].y, 2)
 
         gradientLine(lineEndCoordinates[i].x, lineEndCoordinates[i].y, lineCoordinates[i].x, lineCoordinates[i].y, colors, opacity)
-        // particles.push(new Particles(mappedLineX, mappedLineY))
-        // ellipse(particles[i].x, particles[i].y, 2)
       }
+      dur += 0.03
+    }
 
-
-      duration += .005
+    function pointControl() {
 
     }
     //particle style
@@ -375,7 +400,7 @@
         rgbColor.pop()
       });
 
-      // console.log(rgbColor)
+      // console.log(color(rgbColor))
       return color(rgbColor)
     }
     //layer
